@@ -7,12 +7,11 @@
 <link rel="icon" type="image/x-icon" href="/images/holly-1841718_1280.png">
 <style>
 :root{
---bg:#1c0c0c; 
+  --bg:#1c0c0c; 
   --card:#7a231d; 
   --accent:#e8c38b; 
   --accent2:#e8c38b; 
   --text:#fff6e5;
-
 }
 html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;color:var(--text);background:
 linear-gradient(180deg,#1c0c0c 0%, #3a0f0f 100%);overflow-x:hidden;}
@@ -66,13 +65,24 @@ header h1{margin:0 0 8px 0;font-size:2rem;}
 .label{font-size:.85rem;margin-top:6px;color: #ffeedd;}
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);z-index:999}
 .modal.open{display:flex}
-.card{background:linear-gradient(180deg,#7a0d0d,#3a0f0f);padding:18px;border-radius:10px;width:min(720px,92%);box-shadow:0 18px 60px rgba(0,0,0,0.7);transform-style: preserve-3d;transition: transform .5s;}
+.card{background:linear-gradient(180deg,#7a0d0d,#3a0f0f);padding:18px;border-radius:10px;width:min(900px,96%);max-height:92vh;box-shadow:0 18px 60px rgba(0,0,0,0.7);transform-style: preserve-3d;transition: transform .5s;overflow:auto;}
 .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .closebtn{font-size:1rem;padding:6px 10px;background:var(--accent);border:none;border-radius:6px;color:#3a0f0f;cursor:pointer;}
 .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .hint{font-size:.85rem;color:#ffdca3;margin-top:8px;}
 .snowflake{position:fixed;top:-10px;z-index:1000;user-select:none;pointer-events:none;color:white;font-size:1rem;animation: fall linear infinite;}
 @keyframes fall{0% {transform: translateY(-10px) rotate(0deg);}100% {transform: translateY(110vh) rotate(360deg);}}
+/* PDF iframe styling */
+#pdfFrame{
+  width:100%;
+  height:60vh;
+  border:none;
+  margin-top:12px;
+  border-radius:8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.audioContainer{display:block;width:100%;margin-top:6px;}
+.hidden{display:none !important;}
 </style>
 </head>
 <body>
@@ -101,8 +111,9 @@ header h1{margin:0 0 8px 0;font-size:2rem;}
  </footer>
 </div>
 
+<!-- Modal: enthält jetzt Audio + PDF iframe -->
 <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
-  <div class="card">
+  <div class="card" role="document">
     <div class="topbar">
       <div>
         <h2 id="modal-title">Türchen</h2>
@@ -110,17 +121,22 @@ header h1{margin:0 0 8px 0;font-size:2rem;}
       </div>
       <div><button id="close" class="closebtn">Schließen ✕</button></div>
     </div>
+
     <div id="modal-body">
-      <div class="controls">
-        <audio id="player" controls preload="none"></audio>
+      <!-- Audio player (wird versteckt, wenn kein Audio vorhanden) -->
+      <div class="audioContainer" id="audioContainer">
+        <audio id="player" controls preload="none" style="width:100%"></audio>
       </div>
+
+      <!-- PDF iframe (wird versteckt, wenn kein PDF vorhanden) -->
+      <iframe id="pdfFrame" class="hidden" title="Dokument"></iframe>
+
       <div id="modal-msg" class="hint"></div>
     </div>
   </div>
 </div>
 
 <script>
-
 // ------------------ Schnee ------------------
 for(let i=0;i<50;i++){
   const snow = document.createElement('div');
@@ -141,6 +157,8 @@ const PASSWORD = "Advent2025"; // Passwort für Seite
 const grid = document.getElementById('grid');
 const modal = document.getElementById('modal');
 const player = document.getElementById('player');
+const audioContainer = document.getElementById('audioContainer');
+const pdfFrame = document.getElementById('pdfFrame');
 const modalTitle = document.getElementById('modal-title');
 const modalSub = document.getElementById('modal-sub');
 const modalMsg = document.getElementById('modal-msg');
@@ -189,37 +207,112 @@ function getTileStatus(dayNumber){
   return opened ? "geöffnet" : "öffnen";
 }
 
-// ------------------ Modal ------------------
+// ------------------ Modal handling ------------------
 function showModal(dayNumber){
   modal.setAttribute('aria-hidden','false');
   modal.classList.add('open');
   modalTitle.textContent = `Türchen ${dayNumber}`;
-  modalSub.textContent = "Viel Spaß beim Hören";
-  modalMsg.textContent = "Lade Audio…";
+  modalSub.textContent = "Viel Spaß beim Hören / Lesen";
+  modalMsg.textContent = "Lade Inhalte…";
+  // reset UI
   player.removeAttribute('src');
-
-  loadAudio(dayNumber);
+  player.pause();
+  audioContainer.classList.add('hidden');
+  pdfFrame.classList.add('hidden');
+  pdfFrame.src = '';
+  loadContents(dayNumber);
 }
 
-document.getElementById('close').addEventListener('click',closeModal);
-modal.addEventListener('click',(e)=>{if(e.target===modal)closeModal();});
-function closeModal(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');player.pause();try{URL.revokeObjectURL(player.src);}catch{}player.removeAttribute('src');}
+document.getElementById('close').addEventListener('click', closeModal);
+modal.addEventListener('click',(e)=>{ if(e.target===modal) closeModal(); });
+function closeModal(){
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+  // revoke blobs
+  try{ URL.revokeObjectURL(player.src); }catch(e){}
+  try{ URL.revokeObjectURL(pdfFrame.src); }catch(e){}
+  player.pause();
+  player.removeAttribute('src');
+  pdfFrame.src = '';
+}
 
-// ------------------ Audio laden ------------------
-async function loadAudio(dayNumber){
+// ------------------ Fetch helpers: try fetch audio and pdf ------------------
+async function tryFetch(path){
+  try {
+    const r = await fetch(path, {cache: "no-store"});
+    if(!r.ok) return null;
+    const ab = await r.arrayBuffer();
+    return ab;
+  } catch(e){
+    return null;
+  }
+}
+
+// ------------------ Decrypt buffer with WebCrypto (AES-CBC) --
+async function decryptArrayBuffer(arrayBuffer){
+  const key = await getAESKey();
+  // crypto.subtle.decrypt expects an ArrayBuffer
+  const decrypted = await crypto.subtle.decrypt({ name: "AES-CBC", iv: IV }, key, arrayBuffer);
+  return decrypted; // ArrayBuffer
+}
+
+// ------------------ Load both contents (audio and/or pdf) and show in modal --
+async function loadContents(dayNumber){
+  const id = String(dayNumber).padStart(2,'0');
+  modalMsg.textContent = "Suche Dateien…";
+
+  // Try fetch both encrypted files
+  const audioPath = `audio_encrypted/${id}.enc`;
+  const pdfPath = `pdf_encrypted/${id}.enc`;
+
+  // Parallel fetch to save time
+  const [audioAB, pdfAB] = await Promise.all([ tryFetch(audioPath), tryFetch(pdfPath) ]);
+
+  if(!audioAB && !pdfAB){
+    modalMsg.textContent = 'Keine Datei gefunden für diesen Tag.';
+    return;
+  }
+
   try{
-    const filename = String(dayNumber).padStart(2,'0') + '.enc';
-    const resp = await fetch(`audio_encrypted/${filename}`);
-    if(!resp.ok) throw new Error('Audio nicht gefunden!');
-    const arrayBuffer = await resp.arrayBuffer();
-    const key = await getAESKey();
-    const decrypted = await crypto.subtle.decrypt({name:"AES-CBC",iv:IV},key,arrayBuffer);
-    const blob = new Blob([decrypted], {type:'audio/m4a'});
-    player.src = URL.createObjectURL(blob);
-    player.load();
-    modalMsg.textContent='';
+    // If audio present, decrypt and set up player
+    if(audioAB){
+      modalMsg.textContent = 'Entschlüssle Audio…';
+      const decAudio = await decryptArrayBuffer(audioAB);
+      // create blob - try m4a first then fallback to generic audio/mpeg
+      let audioBlob = new Blob([decAudio], { type: 'audio/m4a' });
+      // create object URL and set player
+      const audioUrl = URL.createObjectURL(audioBlob);
+      player.src = audioUrl;
+      audioContainer.classList.remove('hidden');
+      // don't autoplay; user can press play
+      // keep track to revoke later (will be revoked on close)
+    }
+
+    // If PDF present, decrypt and show in iframe
+    if(pdfAB){
+      modalMsg.textContent = 'Entschlüssle PDF…';
+      const decPdf = await decryptArrayBuffer(pdfAB);
+      const pdfBlob = new Blob([decPdf], { type: 'application/pdf' });
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      pdfFrame.src = pdfUrl;
+      pdfFrame.classList.remove('hidden');
+    }
+
+    modalMsg.textContent = '';
+    // Mark opened (only if not already)
+    if(!localStorage.getItem(`advent_day_${dayNumber}`)){
+      localStorage.setItem(`advent_day_${dayNumber}`, "opened");
+      // Update tile label if present
+      const tile = document.querySelector(`.tile[data-day='${dayNumber}']`);
+      if(tile){
+        tile.classList.add('opened');
+        const lbl = tile.querySelector('.label');
+        if(lbl) lbl.textContent = 'Geöffnet';
+      }
+    }
   }catch(err){
-    modalMsg.textContent='Fehler beim Laden/Entschlüsseln: '+err.message;
+    console.error(err);
+    modalMsg.textContent = 'Fehler beim Entschlüsseln/Anzeigen: ' + (err.message || err);
   }
 }
 
@@ -260,12 +353,6 @@ function openTile(dayNumber,tile){
   setTimeout(()=>tile.classList.remove('flipped'),600);
 
   showModal(dayNumber);
-
-  if(!tile.classList.contains('opened')){
-    tile.classList.add('opened');
-    tile.querySelector('.label').textContent='Geöffnet';
-    localStorage.setItem(`advent_day_${dayNumber}`,"opened");
-  }
 }
 
 // ------------------ Kalender initialisieren (zufällige Reihenfolge) ------------------
@@ -284,7 +371,6 @@ function initCalendar(){
     grid.appendChild(createTile(day));
   });
 }
-
 </script>
 </body>
 </html>
