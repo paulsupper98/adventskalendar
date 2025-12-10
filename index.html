@@ -7,89 +7,43 @@
 <link rel="icon" type="image/x-icon" href="/images/holly-1841718_1280.png">
 <style>
 :root{
-  --bg:#1c0c0c; 
-  --card:#7a231d; 
-  --accent:#e8c38b; 
-  --accent2:#e8c38b; 
-  --text:#fff6e5;
+--bg:#1c0c0c; 
+--card:#7a231d; 
+--accent:#e8c38b; 
+--accent2:#e8c38b; 
+--text:#fff6e5;
 }
-html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;color:var(--text);background:
-linear-gradient(180deg,#1c0c0c 0%, #3a0f0f 100%);overflow-x:hidden;}
-.wrap{
-  max-width:1400px;
-  width:95%;
-  margin:0 auto;
-  padding:24px 12px;
-  text-align:center;
-  display:flex;
-  flex-direction:column;
-  min-height:100vh;
-}
-header, footer{ 
-  padding:12px 0;
-  z-index:100;
-}
+html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;color:var(--text);background:linear-gradient(180deg,#1c0c0c 0%, #3a0f0f 100%);overflow-x:hidden;}
+.wrap{max-width:1400px;width:95%;margin:0 auto;padding:24px 12px;text-align:center;display:flex;flex-direction:column;min-height:100vh;}
+header, footer{padding:12px 0; z-index:100;}
 header h1{margin:0 0 8px 0;font-size:2rem;}
-.grid{
-  display:grid;
-  gap:12px;
-  justify-items:center;
-  margin:16px 0;
-  perspective: 800px;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-}
-@media (min-width: 1200px) { .grid { grid-template-columns: repeat(6, 1fr); } }
-@media (min-width: 768px) and (max-width: 1199px){ .grid { grid-template-columns: repeat(4, 1fr); } }
-@media (max-width: 767px){ .grid { grid-template-columns: repeat(3, minmax(80px,1fr)); } }
-.tile{
-  width:100%;
-  max-width:140px;
-  background:var(--card);
-  border-radius:10px;
-  padding:12px;
-  height:120px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 6px 18px rgba(0,0,0,0.6);
-  cursor:pointer;
-  user-select:none;
-  transition:transform .6s cubic-bezier(0.4, 0, 0.2, 1),box-shadow .3s;
-  transform-style: preserve-3d;
-}
+.grid{display:grid;gap:12px;justify-items:center;margin:16px 0;perspective:800px;grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));}
+@media (min-width:1200px){.grid{grid-template-columns:repeat(6,1fr);}}
+@media (min-width:768px) and (max-width:1199px){.grid{grid-template-columns:repeat(4,1fr);}}
+@media (max-width:767px){.grid{grid-template-columns:repeat(3,minmax(80px,1fr));}}
+.tile{width:100%;max-width:140px;background:var(--card);border-radius:10px;padding:12px;height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,0.6);cursor:pointer;user-select:none;transition:transform .6s cubic-bezier(0.4,0,0.2,1),box-shadow .3s;transform-style: preserve-3d;}
 .tile.opened{outline:3px solid var(--accent2);box-shadow:0 12px 30px rgba(0,0,0,0.5);}
 .tile.flipped{transform: rotateY(15deg) rotateX(-10deg);}
 .tile:active{transform:scale(0.97);}
 .num{font-size:1.8rem;font-weight:700;color:var(--accent2);}
 .label{font-size:.85rem;margin-top:6px;color: #ffeedd;}
-.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);z-index:999}
-.modal.open{display:flex}
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);z-index:999;}
+.modal.open{display:flex;}
 .card{background:linear-gradient(180deg,#7a0d0d,#3a0f0f);padding:18px;border-radius:10px;width:min(900px,96%);max-height:92vh;box-shadow:0 18px 60px rgba(0,0,0,0.7);transform-style: preserve-3d;transition: transform .5s;overflow:auto;}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
 .closebtn{font-size:1rem;padding:6px 10px;background:var(--accent);border:none;border-radius:6px;color:#3a0f0f;cursor:pointer;}
 .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .hint{font-size:.85rem;color:#ffdca3;margin-top:8px;}
 .snowflake{position:fixed;top:-10px;z-index:1000;user-select:none;pointer-events:none;color:white;font-size:1rem;animation: fall linear infinite;}
 @keyframes fall{0% {transform: translateY(-10px) rotate(0deg);}100% {transform: translateY(110vh) rotate(360deg);}}
-
-/* PDF iframe styling */
-#pdfFrame{
-  width:100%;
-  height:60vh;
-  border:none;
-  margin-top:12px;
-  border-radius:8px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-}
-
+#pdfFrame{width:100%;height:60vh;border:none;margin-top:12px;border-radius:8px;box-shadow: 0 8px 24px rgba(0,0,0,0.5);}
 .audioContainer{display:block;width:100%;margin-top:6px;}
 .hidden{display:none !important;}
 </style>
 </head>
 <body>
 
-<!-- PASSWORD OVERLAY -->
+<!-- Passwort-Overlay -->
 <div id="pw-overlay" style="position:fixed;inset:0;background:linear-gradient(180deg,#1c0c0c 0%, #3a0f0f 100%);color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;">
   <h2>Bitte Passwort eingeben</h2>
   <input id="pw-input" type="password" placeholder="Passwort" style="padding:10px;font-size:1rem;border-radius:6px;border:none;margin-top:12px;">
@@ -98,19 +52,19 @@ header h1{margin:0 0 8px 0;font-size:2rem;}
 </div>
 
 <div class="wrap">
+  <div class="mistletoe"></div>
   <header>
     <h1>Adventskalender 2025 🎄</h1>
-    <div>Öffne jeden Tag ein Türchen und hör dir die Geschichten an. ✨</div>
+    <div>Öffne jeden Tag ein Türchen und sieh dir Audio oder PDF an. ✨</div>
   </header>
 
   <main>
     <div id="grid" class="grid" aria-live="polite"></div>
   </main>
-
-  <footer>Frohe Weihnachten. 🕯️</footer>
+ <footer>Frohe Weihnachten. 🕯️</footer>
 </div>
 
-<!-- MODAL -->
+<!-- Modal -->
 <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
   <div class="card" role="document">
     <div class="topbar">
@@ -120,25 +74,20 @@ header h1{margin:0 0 8px 0;font-size:2rem;}
       </div>
       <div><button id="close" class="closebtn">Schließen ✕</button></div>
     </div>
-
     <div id="modal-body">
-      <!-- AUDIO -->
       <div class="audioContainer hidden" id="audioContainer">
         <audio id="player" controls preload="none" style="width:100%"></audio>
       </div>
-
-      <!-- PDF (mit Fix allow="fullscreen") -->
-      <iframe id="pdfFrame" class="hidden" allow="fullscreen" title="Dokument"></iframe>
-
+      <iframe id="pdfFrame" class="hidden" title="Dokument"></iframe>
       <div id="modal-msg" class="hint"></div>
     </div>
   </div>
 </div>
 
 <script>
-/* Schnee */
+// ------------------ Schnee ------------------
 for(let i=0;i<50;i++){
-  const snow=document.createElement('div');
+  const snow = document.createElement('div');
   snow.className='snowflake';
   snow.style.left=Math.random()*100+'vw';
   snow.style.animationDuration=(5+Math.random()*10)+'s';
@@ -147,7 +96,7 @@ for(let i=0;i<50;i++){
   document.body.appendChild(snow);
 }
 
-/* CONFIG */
+// ------------------ Config ------------------
 const TOTAL = 24;
 const AES_KEY_STRING = "mein-geheimer-schluessel";
 const IV = new Uint8Array(16);
@@ -162,14 +111,14 @@ const modalTitle = document.getElementById('modal-title');
 const modalSub = document.getElementById('modal-sub');
 const modalMsg = document.getElementById('modal-msg');
 
-/* PASSWORD */
 const overlay = document.getElementById("pw-overlay");
 const pwInput = document.getElementById("pw-input");
 const pwBtn = document.getElementById("pw-btn");
 const pwMsg = document.getElementById("pw-msg");
 
+// ------------------ Passwortschutz ------------------
 pwBtn.addEventListener("click", checkPassword);
-pwInput.addEventListener("keydown", e => { if(e.key==="Enter") checkPassword(); });
+pwInput.addEventListener("keydown", e => { if(e.key === "Enter") checkPassword(); });
 
 function checkPassword(){
   if(pwInput.value === PASSWORD){
@@ -185,166 +134,142 @@ function checkPassword(){
 
 document.querySelector(".wrap").style.display="none";
 
-/* AES KEY */
+// ------------------ AES Key ------------------
 async function getAESKey(){
-  const enc=new TextEncoder().encode(AES_KEY_STRING);
-  const hash=await crypto.subtle.digest("SHA-256",enc);
-  return await crypto.subtle.importKey("raw",hash,"AES-CBC",false,["decrypt"]);
+  const enc = new TextEncoder().encode(AES_KEY_STRING);
+  const hash = await crypto.subtle.digest("SHA-256", enc);
+  return await crypto.subtle.importKey("raw", hash, "AES-CBC", false, ["decrypt"]);
 }
 
-/* TILE STATUS */
+// ------------------ Tile Status ------------------
 function getTileStatus(dayNumber){
-  const now=new Date();
-  const month=now.getMonth();
-  const today=now.getDate();
-  const opened=localStorage.getItem(`advent_day_${dayNumber}`)==="opened";
+  const now = new Date();
+  const month = now.getMonth();
+  const today = now.getDate();
+  const opened = localStorage.getItem(`advent_day_${dayNumber}`) === "opened";
 
-  if(month!==11) return "verschlossen";
-  if(dayNumber>today) return "verschlossen";
-  return opened?"geöffnet":"öffnen";
+  if(month !== 11) return "verschlossen";
+  if(dayNumber > today) return "verschlossen";
+  return opened ? "geöffnet" : "öffnen";
 }
 
-/* MODAL */
-function showModal(day){
-  modalMsg.textContent="Lade Inhalte…";
-  modal.classList.add("open");
-
-  modalTitle.textContent=`Türchen ${day}`;
-  modalSub.textContent="Viel Spaß beim Hören / Lesen";
-
-  player.pause();
-  player.removeAttribute('src');
-  audioContainer.classList.add("hidden");
-  pdfFrame.classList.add("hidden");
-  pdfFrame.src="";
-
-  loadContents(day);
-}
-
-document.getElementById('close').onclick=closeModal;
-modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
-
+// ------------------ Modal ------------------
+document.getElementById('close').addEventListener('click', closeModal);
+modal.addEventListener('click', (e)=>{ if(e.target===modal) closeModal(); });
 function closeModal(){
   modal.classList.remove('open');
-  try{URL.revokeObjectURL(player.src);}catch(e){}
-  try{URL.revokeObjectURL(pdfFrame.src);}catch(e){}
+  modal.setAttribute('aria-hidden','true');
   player.pause();
+  player.removeAttribute('src');
+  pdfFrame.src='';
+  audioContainer.classList.add('hidden');
+  pdfFrame.classList.add('hidden');
 }
 
-/* FETCH */
+// ------------------ Fetch & Decrypt ------------------
 async function tryFetch(path){
   try{
-    const r=await fetch(path,{cache:"no-store"});
+    const r = await fetch(path, {cache:"no-store"});
     if(!r.ok) return null;
     return await r.arrayBuffer();
-  } catch(e){ return null; }
+  }catch(e){ return null; }
 }
 
-/* DECRYPT */
-async function decryptArrayBuffer(ab){
-  const key=await getAESKey();
-  return await crypto.subtle.decrypt({name:"AES-CBC",iv:IV},key,ab);
+async function decryptArrayBuffer(arrayBuffer){
+  const key = await getAESKey();
+  return await crypto.subtle.decrypt({name:"AES-CBC", iv:IV}, key, arrayBuffer);
 }
 
-/* LOAD AUDIO + PDF */
-async function loadContents(day){
-  const id=String(day).padStart(2,'0');
+// ------------------ Lade Inhalte (Audio + PDF) ------------------
+async function loadContents(dayNumber){
+  const id = String(dayNumber).padStart(2,'0');
+  modalMsg.textContent="Suche Dateien…";
 
-  const audioAB = await tryFetch(`audio_encrypted/${id}.enc`);
-  const pdfAB   = await tryFetch(`pdf_encrypted/${id}.enc`);
+  const [audioAB, pdfAB] = await Promise.all([
+    tryFetch(`audio_encrypted/${id}.enc`),
+    tryFetch(`pdf_encrypted/${id}.enc`)
+  ]);
 
   if(!audioAB && !pdfAB){
-    modalMsg.textContent="Keine Datei gefunden.";
+    modalMsg.textContent='Keine Datei gefunden für diesen Tag.';
     return;
   }
 
   try{
-    /* Audio */
     if(audioAB){
-      modalMsg.textContent="Entschlüssle Audio…";
-      const dec=await decryptArrayBuffer(audioAB);
-      const blob=new Blob([dec],{type:"audio/m4a"});
-      player.src=URL.createObjectURL(blob);
-      audioContainer.classList.remove("hidden");
+      modalMsg.textContent='Entschlüssle Audio…';
+      const decAudio = await decryptArrayBuffer(audioAB);
+      const audioBlob = new Blob([decAudio], {type:'audio/m4a'});
+      player.src = URL.createObjectURL(audioBlob);
+      audioContainer.classList.remove('hidden');
     }
-
-    /* PDF — FIXED */
     if(pdfAB){
-      modalMsg.textContent="Entschlüssle PDF…";
-      const dec=await decryptArrayBuffer(pdfAB);
-      const blob=new Blob([dec],{type:"application/pdf"});
-      const url=URL.createObjectURL(blob);
-
-      pdfFrame.classList.remove("hidden");
-      pdfFrame.src=url;
-
-      pdfFrame.onload = () => {
-        modalMsg.textContent="";
-      };
+      modalMsg.textContent='Entschlüssle PDF…';
+      const decPdf = await decryptArrayBuffer(pdfAB);
+      const pdfBlob = new Blob([decPdf], {type:'application/pdf'});
+      pdfFrame.src = URL.createObjectURL(pdfBlob);
+      pdfFrame.classList.remove('hidden');
     }
-
-    modalMsg.textContent="";
-
-    /* mark as opened */
-    if(!localStorage.getItem(`advent_day_${day}`)){
-      localStorage.setItem(`advent_day_${day}`,"opened");
-
-      const tile=document.querySelector(`.tile[data-day='${day}']`);
-      if(tile){
-        tile.classList.add("opened");
-        tile.querySelector('.label').textContent="Geöffnet";
-      }
+    modalMsg.textContent='';
+    if(!localStorage.getItem(`advent_day_${dayNumber}`)){
+      localStorage.setItem(`advent_day_${dayNumber}`,"opened");
+      const tile = document.querySelector(`.tile[data-day='${dayNumber}']`);
+      if(tile){tile.classList.add('opened'); tile.querySelector('.label').textContent='Geöffnet';}
     }
-
   }catch(err){
-    modalMsg.textContent="Fehler beim Entschlüsseln.";
+    console.error(err);
+    modalMsg.textContent='Fehler beim Entschlüsseln/Anzeigen: ' + (err.message||err);
   }
 }
 
-/* TILE */
-function createTile(day){
-  const t=document.createElement('div');
-  t.className='tile';
-  t.dataset.day=day;
+// ------------------ Tile erstellen ------------------
+function createTile(dayNumber){
+  const tile = document.createElement('div');
+  tile.className='tile';
+  tile.dataset.day=dayNumber;
 
-  const num=document.createElement('div');
+  const num = document.createElement('div');
   num.className='num';
-  num.textContent=day;
+  num.textContent = dayNumber;
 
-  const lbl=document.createElement('div');
+  const lbl = document.createElement('div');
   lbl.className='label';
 
-  const st=getTileStatus(day);
-  if(st==="verschlossen") lbl.textContent="Verschlossen";
-  if(st==="öffnen") lbl.textContent="Öffnen";
-  if(st==="geöffnet"){ lbl.textContent="Geöffnet"; t.classList.add("opened"); }
+  const status = getTileStatus(dayNumber);
+  if(status==="verschlossen") lbl.textContent="Verschlossen";
+  if(status==="öffnen") lbl.textContent="Öffnen";
+  if(status==="geöffnet") lbl.textContent="Geöffnet";
+  if(status==="geöffnet") tile.classList.add('opened');
 
-  t.appendChild(num);
-  t.appendChild(lbl);
+  tile.appendChild(num);
+  tile.appendChild(lbl);
 
-  t.onclick=()=>openTile(day,t);
-  return t;
+  tile.addEventListener('click', ()=>openTile(dayNumber,tile));
+  tile.addEventListener('keydown',(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openTile(dayNumber,tile);}});
+
+  return tile;
 }
 
-function openTile(day,tile){
-  const st=getTileStatus(day);
-  if(st==="verschlossen") return;
-
-  tile.classList.add("flipped");
-  setTimeout(()=>tile.classList.remove("flipped"),600);
-
-  showModal(day);
+// ------------------ Tile öffnen ------------------
+function openTile(dayNumber,tile){
+  const status = getTileStatus(dayNumber);
+  if(status==="verschlossen") return;
+  tile.classList.add('flipped');
+  setTimeout(()=>tile.classList.remove('flipped'),600);
+  loadContents(dayNumber);
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
 }
 
-/* INIT CALENDAR (random shuffle) */
+// ------------------ Kalender initialisieren (random) ------------------
 function initCalendar(){
-  let days=[...Array(TOTAL)].map((_,i)=>i+1);
+  let days = Array.from({length: TOTAL}, (_,i)=>i+1);
   for(let i=days.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [days[i],days[j]]=[days[j],days[i]];
+    const j = Math.floor(Math.random()*(i+1));
+    [days[i], days[j]]=[days[j], days[i]];
   }
   grid.innerHTML="";
-  days.forEach(d=>grid.appendChild(createTile(d)));
+  days.forEach(day=>grid.appendChild(createTile(day)));
 }
 </script>
 </body>
