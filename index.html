@@ -72,6 +72,7 @@ header h1{margin:0 0 8px 0;font-size:2rem;}
 .hint{font-size:.85rem;color:#ffdca3;margin-top:8px;}
 .snowflake{position:fixed;top:-10px;z-index:1000;user-select:none;pointer-events:none;color:white;font-size:1rem;animation: fall linear infinite;}
 @keyframes fall{0% {transform: translateY(-10px) rotate(0deg);}100% {transform: translateY(110vh) rotate(360deg);}}
+
 /* PDF iframe styling */
 #pdfFrame{
   width:100%;
@@ -81,13 +82,14 @@ header h1{margin:0 0 8px 0;font-size:2rem;}
   border-radius:8px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.5);
 }
+
 .audioContainer{display:block;width:100%;margin-top:6px;}
 .hidden{display:none !important;}
 </style>
 </head>
 <body>
 
-<!-- Passwort-Overlay -->
+<!-- PASSWORD OVERLAY -->
 <div id="pw-overlay" style="position:fixed;inset:0;background:linear-gradient(180deg,#1c0c0c 0%, #3a0f0f 100%);color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;">
   <h2>Bitte Passwort eingeben</h2>
   <input id="pw-input" type="password" placeholder="Passwort" style="padding:10px;font-size:1rem;border-radius:6px;border:none;margin-top:12px;">
@@ -96,22 +98,19 @@ header h1{margin:0 0 8px 0;font-size:2rem;}
 </div>
 
 <div class="wrap">
-  <div class="mistletoe"></div>
   <header>
     <h1>Adventskalender 2025 🎄</h1>
-    <div>Öffne jeden Tag ein Türchen und hör dir die Geschichten an. ✨
-    </div>
+    <div>Öffne jeden Tag ein Türchen und hör dir die Geschichten an. ✨</div>
   </header>
 
   <main>
     <div id="grid" class="grid" aria-live="polite"></div>
   </main>
- <footer>
-    Frohe Weihnachten. 🕯️
- </footer>
+
+  <footer>Frohe Weihnachten. 🕯️</footer>
 </div>
 
-<!-- Modal: enthält jetzt Audio + PDF iframe -->
+<!-- MODAL -->
 <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
   <div class="card" role="document">
     <div class="topbar">
@@ -123,13 +122,13 @@ header h1{margin:0 0 8px 0;font-size:2rem;}
     </div>
 
     <div id="modal-body">
-      <!-- Audio player (wird versteckt, wenn kein Audio vorhanden) -->
-      <div class="audioContainer" id="audioContainer">
+      <!-- AUDIO -->
+      <div class="audioContainer hidden" id="audioContainer">
         <audio id="player" controls preload="none" style="width:100%"></audio>
       </div>
 
-      <!-- PDF iframe (wird versteckt, wenn kein PDF vorhanden) -->
-      <iframe id="pdfFrame" class="hidden" title="Dokument"></iframe>
+      <!-- PDF (mit Fix allow="fullscreen") -->
+      <iframe id="pdfFrame" class="hidden" allow="fullscreen" title="Dokument"></iframe>
 
       <div id="modal-msg" class="hint"></div>
     </div>
@@ -137,22 +136,22 @@ header h1{margin:0 0 8px 0;font-size:2rem;}
 </div>
 
 <script>
-// ------------------ Schnee ------------------
+/* Schnee */
 for(let i=0;i<50;i++){
-  const snow = document.createElement('div');
+  const snow=document.createElement('div');
   snow.className='snowflake';
   snow.style.left=Math.random()*100+'vw';
-  snow.style.animationDuration= (5+Math.random()*10)+'s';
+  snow.style.animationDuration=(5+Math.random()*10)+'s';
   snow.style.fontSize=(10+Math.random()*20)+'px';
   snow.textContent='❄';
   document.body.appendChild(snow);
 }
 
-// ------------------ Config ------------------
+/* CONFIG */
 const TOTAL = 24;
 const AES_KEY_STRING = "mein-geheimer-schluessel";
-const IV = new Uint8Array(16); // 16 null bytes
-const PASSWORD = "Advent2025"; // Passwort für Seite
+const IV = new Uint8Array(16);
+const PASSWORD = "Advent2025";
 
 const grid = document.getElementById('grid');
 const modal = document.getElementById('modal');
@@ -163,213 +162,189 @@ const modalTitle = document.getElementById('modal-title');
 const modalSub = document.getElementById('modal-sub');
 const modalMsg = document.getElementById('modal-msg');
 
+/* PASSWORD */
 const overlay = document.getElementById("pw-overlay");
 const pwInput = document.getElementById("pw-input");
 const pwBtn = document.getElementById("pw-btn");
 const pwMsg = document.getElementById("pw-msg");
 
-// ------------------ Passwortschutz ------------------
 pwBtn.addEventListener("click", checkPassword);
-pwInput.addEventListener("keydown", e => { if(e.key === "Enter") checkPassword(); });
+pwInput.addEventListener("keydown", e => { if(e.key==="Enter") checkPassword(); });
 
-function checkPassword() {
+function checkPassword(){
   if(pwInput.value === PASSWORD){
-    overlay.style.display = "none";
-    document.querySelector(".wrap").style.display = "flex";
+    overlay.style.display="none";
+    document.querySelector(".wrap").style.display="flex";
     initCalendar();
   } else {
-    pwMsg.textContent = "Falsches Passwort!";
-    pwInput.value = "";
+    pwMsg.textContent="Falsches Passwort!";
+    pwInput.value="";
     pwInput.focus();
   }
 }
 
-// Kalender initial unsichtbar
-document.querySelector(".wrap").style.display = "none";
+document.querySelector(".wrap").style.display="none";
 
-// ------------------ AES Key vorbereiten ------------------
+/* AES KEY */
 async function getAESKey(){
-  const enc = new TextEncoder().encode(AES_KEY_STRING);
-  const hash = await crypto.subtle.digest("SHA-256", enc);
-  return await crypto.subtle.importKey("raw", hash, "AES-CBC", false, ["decrypt"]);
+  const enc=new TextEncoder().encode(AES_KEY_STRING);
+  const hash=await crypto.subtle.digest("SHA-256",enc);
+  return await crypto.subtle.importKey("raw",hash,"AES-CBC",false,["decrypt"]);
 }
 
-// ------------------ Tile Status ------------------
+/* TILE STATUS */
 function getTileStatus(dayNumber){
-  const now = new Date();
-  const month = now.getMonth(); // Dezember = 11
-  const today = now.getDate();
+  const now=new Date();
+  const month=now.getMonth();
+  const today=now.getDate();
+  const opened=localStorage.getItem(`advent_day_${dayNumber}`)==="opened";
 
-  const opened = localStorage.getItem(`advent_day_${dayNumber}`) === "opened";
-
-  if(month !== 11) return "verschlossen";
-  if(dayNumber > today) return "verschlossen";
-  return opened ? "geöffnet" : "öffnen";
+  if(month!==11) return "verschlossen";
+  if(dayNumber>today) return "verschlossen";
+  return opened?"geöffnet":"öffnen";
 }
 
-// ------------------ Modal handling ------------------
-function showModal(dayNumber){
-  modal.setAttribute('aria-hidden','false');
-  modal.classList.add('open');
-  modalTitle.textContent = `Türchen ${dayNumber}`;
-  modalSub.textContent = "Viel Spaß beim Hören / Lesen";
-  modalMsg.textContent = "Lade Inhalte…";
-  // reset UI
-  player.removeAttribute('src');
+/* MODAL */
+function showModal(day){
+  modalMsg.textContent="Lade Inhalte…";
+  modal.classList.add("open");
+
+  modalTitle.textContent=`Türchen ${day}`;
+  modalSub.textContent="Viel Spaß beim Hören / Lesen";
+
   player.pause();
-  audioContainer.classList.add('hidden');
-  pdfFrame.classList.add('hidden');
-  pdfFrame.src = '';
-  loadContents(dayNumber);
+  player.removeAttribute('src');
+  audioContainer.classList.add("hidden");
+  pdfFrame.classList.add("hidden");
+  pdfFrame.src="";
+
+  loadContents(day);
 }
 
-document.getElementById('close').addEventListener('click', closeModal);
-modal.addEventListener('click',(e)=>{ if(e.target===modal) closeModal(); });
+document.getElementById('close').onclick=closeModal;
+modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
+
 function closeModal(){
   modal.classList.remove('open');
-  modal.setAttribute('aria-hidden','true');
-  // revoke blobs
-  try{ URL.revokeObjectURL(player.src); }catch(e){}
-  try{ URL.revokeObjectURL(pdfFrame.src); }catch(e){}
+  try{URL.revokeObjectURL(player.src);}catch(e){}
+  try{URL.revokeObjectURL(pdfFrame.src);}catch(e){}
   player.pause();
-  player.removeAttribute('src');
-  pdfFrame.src = '';
 }
 
-// ------------------ Fetch helpers: try fetch audio and pdf ------------------
+/* FETCH */
 async function tryFetch(path){
-  try {
-    const r = await fetch(path, {cache: "no-store"});
+  try{
+    const r=await fetch(path,{cache:"no-store"});
     if(!r.ok) return null;
-    const ab = await r.arrayBuffer();
-    return ab;
-  } catch(e){
-    return null;
-  }
+    return await r.arrayBuffer();
+  } catch(e){ return null; }
 }
 
-// ------------------ Decrypt buffer with WebCrypto (AES-CBC) --
-async function decryptArrayBuffer(arrayBuffer){
-  const key = await getAESKey();
-  // crypto.subtle.decrypt expects an ArrayBuffer
-  const decrypted = await crypto.subtle.decrypt({ name: "AES-CBC", iv: IV }, key, arrayBuffer);
-  return decrypted; // ArrayBuffer
+/* DECRYPT */
+async function decryptArrayBuffer(ab){
+  const key=await getAESKey();
+  return await crypto.subtle.decrypt({name:"AES-CBC",iv:IV},key,ab);
 }
 
-// ------------------ Load both contents (audio and/or pdf) and show in modal --
-async function loadContents(dayNumber){
-  const id = String(dayNumber).padStart(2,'0');
-  modalMsg.textContent = "Suche Dateien…";
+/* LOAD AUDIO + PDF */
+async function loadContents(day){
+  const id=String(day).padStart(2,'0');
 
-  // Try fetch both encrypted files
-  const audioPath = `audio_encrypted/${id}.enc`;
-  const pdfPath = `pdf_encrypted/${id}.enc`;
-
-  // Parallel fetch to save time
-  const [audioAB, pdfAB] = await Promise.all([ tryFetch(audioPath), tryFetch(pdfPath) ]);
+  const audioAB = await tryFetch(`audio_encrypted/${id}.enc`);
+  const pdfAB   = await tryFetch(`pdf_encrypted/${id}.enc`);
 
   if(!audioAB && !pdfAB){
-    modalMsg.textContent = 'Keine Datei gefunden für diesen Tag.';
+    modalMsg.textContent="Keine Datei gefunden.";
     return;
   }
 
   try{
-    // If audio present, decrypt and set up player
+    /* Audio */
     if(audioAB){
-      modalMsg.textContent = 'Entschlüssle Audio…';
-      const decAudio = await decryptArrayBuffer(audioAB);
-      // create blob - try m4a first then fallback to generic audio/mpeg
-      let audioBlob = new Blob([decAudio], { type: 'audio/m4a' });
-      // create object URL and set player
-      const audioUrl = URL.createObjectURL(audioBlob);
-      player.src = audioUrl;
-      audioContainer.classList.remove('hidden');
-      // don't autoplay; user can press play
-      // keep track to revoke later (will be revoked on close)
+      modalMsg.textContent="Entschlüssle Audio…";
+      const dec=await decryptArrayBuffer(audioAB);
+      const blob=new Blob([dec],{type:"audio/m4a"});
+      player.src=URL.createObjectURL(blob);
+      audioContainer.classList.remove("hidden");
     }
 
-    // If PDF present, decrypt and show in iframe
+    /* PDF — FIXED */
     if(pdfAB){
-      modalMsg.textContent = 'Entschlüssle PDF…';
-      const decPdf = await decryptArrayBuffer(pdfAB);
-      const pdfBlob = new Blob([decPdf], { type: 'application/pdf' });
-      const pdfUrl = URL.createObjectURL(pdfBlob);
-      pdfFrame.src = pdfUrl;
-      pdfFrame.classList.remove('hidden');
+      modalMsg.textContent="Entschlüssle PDF…";
+      const dec=await decryptArrayBuffer(pdfAB);
+      const blob=new Blob([dec],{type:"application/pdf"});
+      const url=URL.createObjectURL(blob);
+
+      pdfFrame.classList.remove("hidden");
+      pdfFrame.src=url;
+
+      pdfFrame.onload = () => {
+        modalMsg.textContent="";
+      };
     }
 
-    modalMsg.textContent = '';
-    // Mark opened (only if not already)
-    if(!localStorage.getItem(`advent_day_${dayNumber}`)){
-      localStorage.setItem(`advent_day_${dayNumber}`, "opened");
-      // Update tile label if present
-      const tile = document.querySelector(`.tile[data-day='${dayNumber}']`);
+    modalMsg.textContent="";
+
+    /* mark as opened */
+    if(!localStorage.getItem(`advent_day_${day}`)){
+      localStorage.setItem(`advent_day_${day}`,"opened");
+
+      const tile=document.querySelector(`.tile[data-day='${day}']`);
       if(tile){
-        tile.classList.add('opened');
-        const lbl = tile.querySelector('.label');
-        if(lbl) lbl.textContent = 'Geöffnet';
+        tile.classList.add("opened");
+        tile.querySelector('.label').textContent="Geöffnet";
       }
     }
+
   }catch(err){
-    console.error(err);
-    modalMsg.textContent = 'Fehler beim Entschlüsseln/Anzeigen: ' + (err.message || err);
+    modalMsg.textContent="Fehler beim Entschlüsseln.";
   }
 }
 
-// ------------------ Tile erstellen ------------------
-function createTile(dayNumber){
-  const tile = document.createElement('div');
-  tile.className='tile';
-  tile.dataset.day=dayNumber;
+/* TILE */
+function createTile(day){
+  const t=document.createElement('div');
+  t.className='tile';
+  t.dataset.day=day;
 
-  const num = document.createElement('div');
+  const num=document.createElement('div');
   num.className='num';
-  num.textContent = dayNumber;
+  num.textContent=day;
 
-  const lbl = document.createElement('div');
+  const lbl=document.createElement('div');
   lbl.className='label';
 
-  const status = getTileStatus(dayNumber);
-  if(status==="verschlossen") lbl.textContent="Verschlossen";
-  if(status==="öffnen") lbl.textContent="Öffnen";
-  if(status==="geöffnet") lbl.textContent="Geöffnet";
-  if(status==="geöffnet") tile.classList.add('opened');
+  const st=getTileStatus(day);
+  if(st==="verschlossen") lbl.textContent="Verschlossen";
+  if(st==="öffnen") lbl.textContent="Öffnen";
+  if(st==="geöffnet"){ lbl.textContent="Geöffnet"; t.classList.add("opened"); }
 
-  tile.appendChild(num);
-  tile.appendChild(lbl);
+  t.appendChild(num);
+  t.appendChild(lbl);
 
-  tile.addEventListener('click',()=>openTile(dayNumber,tile));
-  tile.addEventListener('keydown',(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openTile(dayNumber,tile);}});
-
-  return tile;
+  t.onclick=()=>openTile(day,t);
+  return t;
 }
 
-// ------------------ Tile öffnen ------------------
-function openTile(dayNumber,tile){
-  const status = getTileStatus(dayNumber);
-  if(status==="verschlossen") return;
+function openTile(day,tile){
+  const st=getTileStatus(day);
+  if(st==="verschlossen") return;
 
-  tile.classList.add('flipped');
-  setTimeout(()=>tile.classList.remove('flipped'),600);
+  tile.classList.add("flipped");
+  setTimeout(()=>tile.classList.remove("flipped"),600);
 
-  showModal(dayNumber);
+  showModal(day);
 }
 
-// ------------------ Kalender initialisieren (zufällige Reihenfolge) ------------------
+/* INIT CALENDAR (random shuffle) */
 function initCalendar(){
-  let days = Array.from({length: TOTAL}, (_,i) => i+1);
-
-  // Fisher-Yates Shuffle
-  for (let i = days.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [days[i], days[j]] = [days[j], days[i]];
+  let days=[...Array(TOTAL)].map((_,i)=>i+1);
+  for(let i=days.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [days[i],days[j]]=[days[j],days[i]];
   }
-
-  grid.innerHTML = "";
-
-  days.forEach(day => {
-    grid.appendChild(createTile(day));
-  });
+  grid.innerHTML="";
+  days.forEach(d=>grid.appendChild(createTile(d)));
 }
 </script>
 </body>
