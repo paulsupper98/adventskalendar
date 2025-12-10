@@ -73,22 +73,28 @@ header h1{margin:0 0 8px 0;font-size:2rem;}
 .snowflake{position:fixed;top:-10px;z-index:1000;user-select:none;pointer-events:none;color:white;font-size:1rem;animation: fall linear infinite;}
 @keyframes fall{0% {transform: translateY(-10px) rotate(0deg);}100% {transform: translateY(110vh) rotate(360deg);}}
 /* PDF iframe styling */
-#pdfFrame{
-  width:100%;
-  height:60vh;
-  border:none;
-  margin-top:12px;
-  border-radius:12px;
-  box-shadow:0 12px 36px rgba(0,0,0,0.6);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+/* PDF iframe styling – schöner und moderner */
+#pdfFrame {
+  width: 100%;
+  height: 65vh;
+  border: 2px solid #e8c38b;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.7);
   background-color: #1c0c0c;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  margin-top: 16px;
 }
-#pdfFrame:hover{
+
+#pdfFrame:hover {
   transform: scale(1.02);
-  box-shadow:0 18px 48px rgba(0,0,0,0.7);
+  box-shadow: 0 18px 60px rgba(0,0,0,0.8);
+  border-color: #ffdca3;
 }
-#pdfFrame:focus{
-  outline:3px solid var(--accent2);
+
+#pdfFrame:focus {
+  outline: none;
+  border-color: #ffdca3;
+  box-shadow: 0 0 0 4px rgba(232,195,139,0.5);
 }
 .audioContainer{display:block;width:100%;margin-top:6px;}
 .hidden{display:none !important;}
